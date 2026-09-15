@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="sw">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geno Wholesale Women - Modern POS & Analytics</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js CDN for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(236, 72, 153, 0.4);
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(236, 72, 153, 0.8);
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #printableReceipt,
+            #printableReceipt *,
+            #pdfReportTemplate,
+            #pdfReportTemplate * {
+                visibility: visible;
+            }
+
+            #printableReceipt,
+            #pdfReportTemplate {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                color: #000;
+                background: #fff;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased custom-scrollbar">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+
+        <!-- Sidebar Navigation -->
+        <aside
+            class="w-full md:w-64 bg-slate-900 border-r border-slate-800/80 p-5 flex flex-col justify-between shrink-0">
+            <div>
+                <!-- Brand Header -->
+                <div class="flex items-center space-x-3 mb-8">
+                    <div
+                        class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-pink-600 via-rose-500 to-amber-400 flex items-center justify-center font-black text-2xl text-white shadow-lg shadow-pink-500/30 tracking-tighter">
+                        G
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold tracking-wider text-pink-400 text-lg leading-tight">GENO</h1>
+                        <p class="text-[10px] text-slate-400 tracking-widest font-semibold uppercase">Wholesale Women
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <nav class="space-y-2">
+                    <button onclick="switchTab('pos')" id="btn-pos"
+                        class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-pink-600/20 text-pink-400 font-medium border border-pink-500/30 transition">
+                        <i class="fa-solid fa-cash-register w-5 text-center"></i>
+                        <span>POS / Mauzo</span>
+                    </button>
+                    <button onclick="switchTab('inventory')" id="btn-inventory"
+                        class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-200 font-medium transition">
+                        <i class="fa-solid fa-boxes-stacked w-5 text-center"></i>
+                        <span>Stoki & Bidhaa</span>
+                    </button>
+                    <button onclick="switchTab('expenses')" id="btn-expenses"
+                        class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-200 font-medium transition">
+                        <i class="fa-solid fa-receipt w-5 text-center"></i>
+                        <span>Matumizi Duka</span>
+                    </button>
+                    <button onclick="switchTab('analytics')" id="btn-analytics"
+                        class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-200 font-medium transition">
+                        <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                        <span>Uchanganuzi / P&L</span>
+                    </button>
+                    <button onclick="switchTab('history')" id="btn-history"
+                        class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-200 font-medium transition">
+                        <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i>
+                        <span>Kumbukumbu Risiti</span>
+                    </button>
+                    <button onclick="switchTab('reports')" id="btn-reports"
+                        class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-200 font-medium transition">
+                        <i class="fa-solid fa-file-pdf w-5 text-center"></i>
+                        <span>Ripoti za PDF</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Quick Actions / Backup & Restore Controls -->
+            <div class="pt-6 border-t border-slate-800/80 space-y-2 mt-6">
+                <button onclick="exportDataJSON()"
+                    class="w-full text-xs text-slate-300 hover:text-white py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Pakua Backup (JSON)</span>
+                </button>
+                <label
+                    class="w-full text-xs text-slate-300 hover:text-white py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-upload"></i>
+                    <span>Rejesha Data (Import)</span>
+                    <input type="file" id="importJsonInput" accept=".json" onchange="importDataJSON(event)"
+                        class="hidden">
+                </label>
+                <button onclick="resetToInitialData()"
+                    class="w-full text-xs text-rose-400/80 hover:text-rose-400 py-2 border border-rose-500/20 hover:border-rose-500/40 rounded-lg transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Weka Data za Mwanzo</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Dynamic Content Workspace -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto custom-scrollbar">
+
+            <!-- Custom Toast Notification -->
+            <div id="toast"
+                class="fixed top-5 right-5 z-50 transform translate-x-full opacity-0 transition-all duration-300 ease-in-out max-w-sm glass px-5 py-4 rounded-xl border-l-4 border-emerald-500 shadow-2xl flex items-center space-x-3 pointer-events-none">
+                <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-xl"></i>
+                <div>
+                    <h4 id="toastTitle" class="font-bold text-sm text-white">Mafanikio</h4>
+                    <p id="toastMessage" class="text-xs text-slate-300">Taarifa imehifadhiwa.</p>
+                </div>
+            </div>
+
+            <!-- SECTION 1: POS (QUICK MULTI-ITEM SALE) -->
+            <section id="section-pos" class="tab-content space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-white tracking-tight">Sehemu ya Mauzo (POS)</h2>
+                        <p class="text-xs text-slate-400">Chagua bidhaa, unda kikapu cha wateja wa jumla au rejareja,
+                            kisha kamilisha mauzo.</p>
+                    </div>
+                    <div
+                        class="flex items-center space-x-3 bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-800">
+                        <i class="fa-solid fa-calendar-day text-pink-400"></i>
+                        <span id="currentDateDisplay" class="text-xs font-semibold text-slate-300"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                    <!-- Left: Product Selector Grid -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="flex items-center space-x-3 bg-slate-900 border border-slate-800 p-2 rounded-xl">
+                            <i class="fa-solid fa-magnifying-glass text-slate-400 pl-2"></i>
+                            <input type="text" id="posSearchInput" oninput="renderPosGrid()"
+                                placeholder="Tafuta bidhaa kulingana na jina..."
+                                class="w-full bg-transparent text-sm text-white focus:outline-none">
+                        </div>
+
+                        <div id="posGridContainer"
+                            class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[600px] overflow-y-auto pr-1 custom-scrollbar">
+                            <!-- Rendered Stock Items Cards -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Cart & Checkout Summary -->
+                    <div class="lg:col-span-5">
+                        <div class="glass p-6 rounded-2xl sticky top-4 space-y-5">
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                                <h3 class="text-base font-bold text-pink-400 flex items-center space-x-2">
+                                    <i class="fa-solid fa-cart-flatbed"></i>
+                                    <span>Kikapu cha Mauzo</span>
+                                </h3>
+                                <button onclick="clearCart()"
+                                    class="text-xs text-rose-400 hover:text-rose-300 flex items-center space-x-1">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                    <span>Futa vyote</span>
+                                </button>
+                            </div>
+
+                            <!-- Cart Item List Table -->
+                            <div class="max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="text-slate-400 border-b border-slate-800">
+                                            <th class="pb-2">Bidhaa</th>
+                                            <th class="pb-2 text-center">Idadi</th>
+                                            <th class="pb-2 text-right">Bei (TZS)</th>
+                                            <th class="pb-2 text-right">Jumla</th>
+                                            <th class="pb-2 text-center"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cartTableBody" class="divide-y divide-slate-800/60">
+                                        <!-- Dynamic Cart Rows -->
+                                    </tbody>
+                                </table>
+                                <div id="emptyCartMessage" class="py-8 text-center text-slate-500 text-xs">
+                                    <i class="fa-solid fa-basket-shopping text-3xl mb-2 opacity-30"></i>
+                                    <p>Kikapu kiko wazi. Bonyeza bidhaa kuongeza.</p>
+                                </div>
+                            </div>
+
+                            <!-- Customer & Payment Details -->
+                            <div class="pt-3 border-t border-slate-800/80 space-y-3">
+                                <div>
+                                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Aina ya Mteja /
+                                        Njia ya Malipo</label>
+                                    <select id="posPaymentType"
+                                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                                        <option value="Cash / Taslimu">Cash / Taslimu</option>
+                                        <option value="M-Pesa / Tigo Pesa">M-Pesa / Tigo Pesa</option>
+                                        <option value="NMB / CRDB Bank">NMB / CRDB Bank</option>
+                                        <option value="Mkopo / Deno">Mkopo / Mteja wa Nyuma</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Jina la Mteja
+                                        (Hiari)</label>
+                                    <input type="text" id="posCustomerName" placeholder="mf. Duka la Mama Mwajuma"
+                                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                                </div>
+
+                                <!-- Financial Breakdown -->
+                                <div class="p-4 bg-slate-900/90 rounded-xl border border-slate-800 space-y-2">
+                                    <div class="flex justify-between text-xs text-slate-400">
+                                        <span>Jumla ya Idadi:</span>
+                                        <span id="cartTotalItems" class="font-bold text-white">0 Pcs</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs text-slate-400">
+                                        <span>Kadirio la Faida Halisi:</span>
+                                        <span id="cartEstimatedProfit" class="font-bold text-emerald-400">TZS 0</span>
+                                    </div>
+                                    <div
+                                        class="flex justify-between text-base font-extrabold text-white pt-2 border-t border-slate-800">
+                                        <span>Jumla Kuu:</span>
+                                        <span id="cartGrandTotal" class="text-pink-400">TZS 0</span>
+                                    </div>
+                                </div>
+
+                                <button onclick="checkoutCart()"
+                                    class="w-full py-3.5 bg-gradient-to-r from-pink-600 via-rose-600 to-pink-500 hover:from-pink-500 hover:to-rose-500 font-bold rounded-xl transition shadow-lg shadow-pink-600/30 flex items-center justify-center space-x-2 text-sm text-white">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Kamilisha & Toa Risiti</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 2: INVENTORY MANAGEMENT -->
+            <section id="section-inventory" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-white tracking-tight">Usimamizi wa Stoki na Mzigo</h2>
+                        <p class="text-xs text-slate-400">Ongeza shehena mpya, fuatilia gharama za ununuzi + usafiri, na
+                            weka bei za kuuzia.</p>
+                    </div>
+                    <button onclick="openAddInventoryModal()"
+                        class="px-4 py-2.5 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-pink-600/20 flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Ingiza Mzigo Mpya</span>
+                    </button>
+                </div>
+
+                <!-- Inventory List Table Card -->
+                <div class="glass p-6 rounded-2xl overflow-x-auto">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+                        <h3 class="text-base font-bold text-slate-200">Orodha ya Mzigo Uliopo & Wepesi</h3>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="inventorySearch" oninput="renderInventoryTable()"
+                                placeholder="Tafuta stoki..."
+                                class="p-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none">
+                        </div>
+                    </div>
+
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+                                <th class="p-3">Bidhaa</th>
+                                <th class="p-3">Kundi / Mwezi</th>
+                                <th class="p-3 text-center">Stoki Iliyopo</th>
+                                <th class="p-3">Gharama Ununuzi</th>
+                                <th class="p-3">Gharama Usafiri</th>
+                                <th class="p-3">Gharama / Pc</th>
+                                <th class="p-3">Bei ya Kuuzia</th>
+                                <th class="p-3">Tarajiwa ya Faida/Pc</th>
+                                <th class="p-3 text-right">Kitendo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody" class="divide-y divide-slate-800/70 text-slate-300">
+                            <!-- Dynamic Inventory Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION 3: EXPENSE MANAGEMENT -->
+            <section id="section-expenses" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-white tracking-tight">Usimamizi wa Matumizi ya Duka</h2>
+                        <p class="text-xs text-slate-400">Rekodi gharama za kodi, umeme, chakula, posho, na mifuko ya
+                            ufungashaji.</p>
+                    </div>
+                    <button onclick="openAddExpenseModal()"
+                        class="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-rose-600/20 flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Rekodi Matumizi</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 glass p-6 rounded-2xl space-y-4">
+                        <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">Muhtasari wa Matumizi</h3>
+                        <div id="expenseCategoryBreakdown" class="space-y-3">
+                            <!-- Category items progress -->
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 glass p-6 rounded-2xl overflow-x-auto">
+                        <h3 class="text-base font-bold text-slate-200 mb-4">Orodha ya Matumizi Yote</h3>
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                                    <th class="p-3">Tarehe</th>
+                                    <th class="p-3">Kipengele</th>
+                                    <th class="p-3">Maelezo</th>
+                                    <th class="p-3 text-right">Kiasi (TZS)</th>
+                                    <th class="p-3 text-right">Kitendo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenseTableBody" class="divide-y divide-slate-800/70 text-slate-300">
+                                <!-- Expense rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: ANALYTICS & P&L REPORTING -->
+            <section id="section-analytics" class="tab-content hidden space-y-6">
+
+                <!-- Header & Date Range Controller -->
+                <div
+                    class="flex flex-col lg:flex-row justify-between lg:items-center gap-4 bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
+                    <div>
+                        <h2 class="text-2xl font-black text-white tracking-tight">Uchanganuzi wa Mapato na Faida (P&L)
+                        </h2>
+                        <p class="text-xs text-slate-400">Tathmini mwenendo wa biashara na faida halisi kwa kuchagua
+                            muda maalum.</p>
+                    </div>
+
+                    <!-- Filter Controls -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="setAnalyticsTimeframe('today')" id="filter-today"
+                            class="analytics-filter-btn text-xs px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-medium transition">Leo</button>
+                        <button onclick="setAnalyticsTimeframe('week')" id="filter-week"
+                            class="analytics-filter-btn text-xs px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-medium transition">Wiki
+                            Hii</button>
+                        <button onclick="setAnalyticsTimeframe('month')" id="filter-month"
+                            class="analytics-filter-btn text-xs px-3.5 py-2 rounded-xl bg-pink-600 text-white font-medium transition">Mwezi
+                            Huu</button>
+                        <button onclick="setAnalyticsTimeframe('year')" id="filter-year"
+                            class="analytics-filter-btn text-xs px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-medium transition">Mwaka
+                            Mzima</button>
+                        <button onclick="setAnalyticsTimeframe('all')" id="filter-all"
+                            class="analytics-filter-btn text-xs px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-medium transition">Muda
+                            Wote</button>
+                    </div>
+                </div>
+
+                <!-- Custom Date Range Sub-Bar -->
+                <div
+                    class="flex flex-wrap items-center gap-3 bg-slate-900/50 p-4 rounded-xl border border-slate-800/80 text-xs">
+                    <span class="text-slate-400 font-semibold flex items-center space-x-1">
+                        <i class="fa-solid fa-filter"></i>
+                        <span>Chagua Tarehe Maalum:</span>
+                    </span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-slate-500">Kuanzia:</span>
+                        <input type="date" id="analyticsStartDate" onchange="applyCustomDateFilter()"
+                            class="bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white focus:outline-none">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-slate-500">Mwisho:</span>
+                        <input type="date" id="analyticsEndDate" onchange="applyCustomDateFilter()"
+                            class="bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- KPI Summary Metric Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass p-5 rounded-2xl border-l-4 border-emerald-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[11px] text-slate-400 font-semibold uppercase">Jumla ya Mauzo (Revenue)
+                                </p>
+                                <h3 id="cardTotalRevenue" class="text-xl font-extrabold text-emerald-400 mt-1">TZS 0
+                                </h3>
+                            </div>
+                            <div
+                                class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <i class="fa-solid fa-money-bill-wave"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass p-5 rounded-2xl border-l-4 border-rose-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[11px] text-slate-400 font-semibold uppercase">Gharama za Bidhaa (COGS)
+                                </p>
+                                <h3 id="cardTotalCostOfGoods" class="text-xl font-extrabold text-rose-400 mt-1">TZS 0
+                                </h3>
+                            </div>
+                            <div
+                                class="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center text-rose-400">
+                                <i class="fa-solid fa-boxes-packing"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass p-5 rounded-2xl border-l-4 border-amber-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[11px] text-slate-400 font-semibold uppercase">Matumizi ya Duka
+                                    (Expenses)</p>
+                                <h3 id="cardTotalExpenses" class="text-xl font-extrabold text-amber-400 mt-1">TZS 0</h3>
+                            </div>
+                            <div
+                                class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass p-5 rounded-2xl border-l-4 border-pink-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[11px] text-slate-400 font-semibold uppercase">Faida Halisi (Net Profit)
+                                </p>
+                                <h3 id="cardNetProfit" class="text-xl font-extrabold text-pink-400 mt-1">TZS 0</h3>
+                            </div>
+                            <div
+                                class="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center text-pink-400">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profitability Insights Panel -->
+                <div
+                    class="glass p-5 rounded-2xl border border-pink-500/20 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center space-x-4">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-600 to-rose-500 flex items-center justify-center text-white text-xl font-bold">
+                            <i class="fa-solid fa-piggy-bank"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-white">Thamani ya Stoki Inayopatikana Dukani</h4>
+                            <p class="text-xs text-slate-400">Kiasi cha mtaji kilichopo kwenye nguo zilizobaki bila
+                                kuuzwa.</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span id="cardRemainingStockValue" class="text-2xl font-black text-amber-400">TZS 0</span>
+                    </div>
+                </div>
+
+                <!-- Analytics Visual Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass p-6 rounded-2xl space-y-3">
+                        <h3 class="text-sm font-bold text-slate-200">Ulinganisho wa Mapato vs Gharama na Matumizi</h3>
+                        <div class="h-72">
+                            <canvas id="financialChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass p-6 rounded-2xl space-y-3">
+                        <h3 class="text-sm font-bold text-slate-200">Mwelekeo wa Faida Halisi Kulingana na Muda</h3>
+                        <div class="h-72">
+                            <canvas id="profitTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: SALES HISTORY & RECEIPTS LOG -->
+            <section id="section-history" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-white tracking-tight">Kumbukumbu Za Mauzo Ya Nyuma</h2>
+                        <p class="text-xs text-slate-400">Orodha kamili ya miamala yote iliyofanyika pamoja na risiti.
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="salesHistorySearch" oninput="renderSalesHistoryTable()"
+                            placeholder="Tafuta kwa mteja au bidhaa..."
+                            class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="glass p-6 rounded-2xl overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+                                <th class="p-3">ID / Tarehe</th>
+                                <th class="p-3">Mteja / Njia</th>
+                                <th class="p-3">Bidhaa Zilizouzwa</th>
+                                <th class="p-3 text-center">Jumla Pcs</th>
+                                <th class="p-3">Jumla Mauzo</th>
+                                <th class="p-3">Faida Halisi</th>
+                                <th class="p-3 text-right">Kitendo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesHistoryTableBody" class="divide-y divide-slate-800/70 text-slate-300">
+                            <!-- Dynamic Sales Log Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION 6: PDF REPORTS GENERATOR & SAVED REPORTS LOG -->
+            <section id="section-reports" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-white tracking-tight">Tengeneza & Hifadhi Ripoti Za PDF</h2>
+                        <p class="text-xs text-slate-400">Tengeneza ripoti rasmi ya kifedha, ipakue kama PDF, na
+                            uihifadhi kwenye kumbukumbu ya mfumo.</p>
+                    </div>
+                    <button onclick="generateAndSavePDFReport()"
+                        class="px-4 py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-pink-600/30 flex items-center space-x-2">
+                        <i class="fa-solid fa-file-export"></i>
+                        <span>Tengeneza Ripoti Mpya (PDF)</span>
+                    </button>
+                </div>
+
+                <!-- Saved Reports Table -->
+                <div class="glass p-6 rounded-2xl overflow-x-auto">
+                    <h3 class="text-base font-bold text-slate-200 mb-4">Kumbukumbu ya Ripoti Zilizohifadhiwa (Saved PDF
+                        Log)</h3>
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+                                <th class="p-3">ID / Tarehe ya Kutengenezwa</th>
+                                <th class="p-3">Muda wa Ripoti (Timeframe)</th>
+                                <th class="p-3">Jumla ya Mauzo</th>
+                                <th class="p-3">Faida Halisi</th>
+                                <th class="p-3">Matumizi</th>
+                                <th class="p-3 text-right">Kitendo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="savedReportsTableBody" class="divide-y divide-slate-800/70 text-slate-300">
+                            <!-- Dynamic Saved Reports Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL: EDIT INVENTORY ITEM PRICES -->
+    <div id="modalEditInventory"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="glass p-6 rounded-2xl w-full max-w-md space-y-4 border border-slate-700">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-lg text-pink-400">Boresha / Badili Bei ya Bidhaa</h3>
+                <button onclick="closeModal('modalEditInventory')" class="text-slate-400 hover:text-white"><i
+                        class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="editInventoryForm" onsubmit="handleEditInventorySubmit(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="editInvId">
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Jina la Bidhaa</label>
+                    <input type="text" id="editInvItemName" required
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Stoki Iliyopo (Pcs)</label>
+                        <input type="number" id="editInvQuantity" min="0" required
+                            class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Mwezi / Kundi</label>
+                        <input type="text" id="editInvMonth" required
+                            class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Gharama ya Ununuzi (TZS)</label>
+                    <input type="number" id="editInvCost" min="0" required
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Gharama ya Usafiri (TZS)</label>
+                    <input type="number" id="editInvShipping" min="0" required
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Bei ya Kuuzia Kwa Pc (TZS)</label>
+                    <input type="number" id="editInvSellingPrice" min="0" required
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                </div>
+
+                <button type="submit"
+                    class="w-full py-3 bg-pink-600 hover:bg-pink-500 font-bold rounded-xl transition text-white mt-2 shadow-lg shadow-pink-600/30">
+                    Hifadhi Mabadiliko
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD INVENTORY ITEM -->
+    <div id="modalAddInventory"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="glass p-6 rounded-2xl w-full max-w-md space-y-4 border border-slate-700">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-lg text-pink-400">Ingiza Mzigo Mpya</h3>
+                <button onclick="closeModal('modalAddInventory')" class="text-slate-400 hover:text-white"><i
+                        class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="inventoryForm" onsubmit="handleInventorySubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Jina la Bidhaa</label>
+                    <input type="text" id="invItemName" required placeholder="mf. Dera/Bobo au Jean"
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Idadi (Pcs)</label>
+                        <input type="number" id="invQuantity" min="1" required placeholder="100"
+                            class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Mwezi / Kundi</label>
+                        <select id="invMonth"
+                            class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                            <option value="Jan-Mar">Jan - Mar</option>
+                            <option value="Apr">April</option>
+                            <option value="Jul">July</option>
+                            <option value="Aug">August</option>
+                            <option value="Sep">September</option>
+                            <option value="Oct">October</option>
+                            <option value="Nov">November</option>
+                            <option value="Dec">December</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Jumla ya Gharama ya Ununuzi (TZS)</label>
+                    <input type="number" id="invCost" min="0" required placeholder="1570310"
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Gharama ya Usafiri / Mzigo (TZS)</label>
+                    <input type="number" id="invShipping" min="0" value="0" placeholder="329200"
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Bei ya Kuuzia Kwa Pc Moja (TZS)</label>
+                    <input type="number" id="invSellingPrice" min="0" required placeholder="25000"
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                </div>
+
+                <button type="submit"
+                    class="w-full py-3 bg-pink-600 hover:bg-pink-500 font-bold rounded-xl transition text-white mt-2 shadow-lg shadow-pink-600/30">
+                    Hifadhi Kwenye Stoki
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD EXPENSE -->
+    <div id="modalAddExpense"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="glass p-6 rounded-2xl w-full max-w-md space-y-4 border border-slate-700">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-lg text-rose-400">Rekodi Matumizi Ya Duka</h3>
+                <button onclick="closeModal('modalAddExpense')" class="text-slate-400 hover:text-white"><i
+                        class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="expenseForm" onsubmit="handleExpenseSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Kipengele Cha Matumizi</label>
+                    <select id="expCategory" required
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-rose-500">
+                        <option value="Kodi ya Duka">Kodi ya Duka</option>
+                        <option value="Umeme / Maji">Umeme / Maji</option>
+                        <option value="Usafiri wa Ndani">Usafiri wa Ndani</option>
+                        <option value="Chakula / Posho">Chakula / Posho</option>
+                        <option value="Ufungashaji / Mifuko">Ufungashaji / Mifuko</option>
+                        <option value="Mengineyo">Mengineyo</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Kiasi cha Fedha (TZS)</label>
+                    <input type="number" id="expAmount" min="1" required placeholder="50000"
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-rose-500">
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Tarehe</label>
+                    <input type="date" id="expDate" required
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-rose-500">
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Maelezo Ziada</label>
+                    <textarea id="expNote" rows="2" placeholder="Maelezo mafupi..."
+                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-rose-500"></textarea>
+                </div>
+
+                <button type="submit"
+                    class="w-full py-3 bg-rose-600 hover:bg-rose-500 font-bold rounded-xl transition text-white mt-2 shadow-lg shadow-rose-600/30">
+                    Hifadhi Matumizi
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: PRINTABLE RECEIPT PREVIEW -->
+    <div id="modalReceipt"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="glass p-6 rounded-2xl w-full max-w-sm space-y-4 border border-slate-700 text-slate-800 bg-white">
+            <div id="printableReceipt" class="space-y-4 text-xs font-mono text-black">
+                <div class="text-center border-b border-dashed border-slate-400 pb-3">
+                    <h2 class="font-bold text-lg tracking-wider">GENO WHOLESALE</h2>
+                    <p class="text-[10px]">Mavazi ya Wanawake - Jumla na Rejareja</p>
+                    <p class="text-[10px] mt-1" id="receiptDate">Tarehe: 2026-09-13</p>
+                    <p class="text-[10px]" id="receiptNumber">Risiti No: #GW-0000</p>
+                </div>
+
+                <div>
+                    <p id="receiptCustomer" class="font-bold">Mteja: Cash Sale</p>
+                    <p id="receiptPayment" class="text-[11px]">Njia: Cash / Taslimu</p>
+                </div>
+
+                <table class="w-full border-t border-b border-dashed border-slate-400 py-2 my-2 text-left">
+                    <thead>
+                        <tr class="text-[10px] border-b border-slate-300">
+                            <th>Bidhaa</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-right">Bei</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receiptItemsBody">
+                        <!-- Items rendered dynamically -->
+                    </tbody>
+                </table>
+
+                <div class="space-y-1 text-right font-bold pt-1">
+                    <p id="receiptGrandTotal" class="text-sm">JUMLA: TZS 0</p>
+                </div>
+
+                <div class="text-center pt-4 border-t border-dashed border-slate-400 text-[10px]">
+                    <p class="font-bold">Ahsante kwa kufanya biashara nasi!</p>
+                    <p>Karibu Tena Geno Wholesale Women Clothes</p>
+                </div>
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button onclick="window.print()"
+                    class="flex-1 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-print mr-1"></i> Chapisha (Print)
+                </button>
+                <button onclick="closeModal('modalReceipt')"
+                    class="px-4 py-2 bg-slate-200 text-slate-800 rounded-xl font-bold text-xs hover:bg-slate-300 transition">
+                    Funga
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HIDDEN PDF REPORT PRINT TEMPLATE CONTAINER -->
+    <div id="pdfReportTemplate" class="hidden text-black bg-white p-8 space-y-6 max-w-2xl mx-auto">
+        <div class="border-b-2 border-black pb-4 text-center">
+            <h1 class="text-2xl font-black">GENO WHOLESALE WOMEN CLOTHES</h1>
+            <p class="text-sm">Ripoti Rasmi ya Kifedha & Mauzo (Financial & Sales Report)</p>
+            <p class="text-xs mt-1" id="pdfReportGeneratedDate"></p>
+            <p class="text-xs font-bold" id="pdfReportTimeframe"></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-xs font-bold">
+            <div class="p-3 border border-slate-300">
+                <p>Jumla ya Mapato (Revenue):</p>
+                <p id="pdfPdfRevenue" class="text-base text-black"></p>
+            </div>
+            <div class="p-3 border border-slate-300">
+                <p>Gharama za Bidhaa (COGS):</p>
+                <p id="pdfPdfCOGS" class="text-base text-black"></p>
+            </div>
+            <div class="p-3 border border-slate-300">
+                <p>Matumizi ya Duka (Expenses):</p>
+                <p id="pdfPdfExpenses" class="text-base text-black"></p>
+            </div>
+            <div class="p-3 border border-slate-300">
+                <p>Faida Halisi (Net Profit):</p>
+                <p id="pdfPdfNetProfit" class="text-base text-black"></p>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="font-bold text-sm mb-2">Thamani ya Mzigo Uliopo Dukani: <span id="pdfPdfStockValue"></span></h3>
+        </div>
+
+        <div class="pt-6 border-t border-slate-300 text-center text-xs">
+            <p>Ripoti hii imetengenezwa kiotomatiki na Mfumo wa Geno Wholesale POS & Analytics.</p>
+        </div>
+    </div>
+
+    <script>
+        // PRELOADED HISTORICAL DATASET (USER SPECIFIED EXACT 14 BATCHES)
+        const defaultInventory = [
+            {id: 'inv_1', item: 'dera/bobo', quantity: 100, originalQty: 100, cost: 1570310, shipping: 329200, price: 25000, month: 'Jan-Mar'},
+            {id: 'inv_2', item: 'magauni amoei', quantity: 99, originalQty: 99, cost: 3770000, shipping: 408800, price: 48000, month: 'Jan-Mar'},
+            {id: 'inv_3', item: 'mashati shein', quantity: 240, originalQty: 240, cost: 2157500, shipping: 415435, price: 15000, month: 'Jan-Mar'},
+            {id: 'inv_4', item: 'top mashati sketi blauyi mchanganyiko', quantity: 346, originalQty: 346, cost: 3125680, shipping: 168000, price: 12000, month: 'Jan-Mar'},
+            {id: 'inv_5', item: 'bonka trackpants', quantity: 10, originalQty: 10, cost: 64050, shipping: 415435, price: 55000, month: 'Jan-Mar'},
+            {id: 'inv_6', item: 'official trousers cotton', quantity: 30, originalQty: 30, cost: 246000, shipping: 0, price: 15000, month: 'Jan-Mar'},
+            {id: 'inv_7', item: 'big size official', quantity: 20, originalQty: 20, cost: 273000, shipping: 0, price: 20000, month: 'Jan-Mar'},
+            {id: 'inv_8', item: 'straight buggy jeans', quantity: 20, originalQty: 20, cost: 252000, shipping: 0, price: 18000, month: 'Jan-Mar'},
+            {id: 'inv_9', item: 'wiska buggy jeans', quantity: 20, originalQty: 20, cost: 252000, shipping: 0, price: 18000, month: 'Jan-Mar'},
+            {id: 'inv_10', item: 'offwhite jeans', quantity: 6, originalQty: 6, cost: 70200, shipping: 0, price: 18000, month: 'Jan-Mar'},
+            {id: 'inv_11', item: 'straight jeans', quantity: 10, originalQty: 10, cost: 117000, shipping: 0, price: 18000, month: 'Jan-Mar'},
+            {id: 'inv_12', item: 'scalt jeans', quantity: 20, originalQty: 20, cost: 264000, shipping: 0, price: 18000, month: 'Jan-Mar'},
+            {id: 'inv_13', item: 'sweta', quantity: 200, originalQty: 200, cost: 1667050, shipping: 588000, price: 15000, month: 'Apr'},
+            {id: 'inv_14', item: 't shirt linel trousers', quantity: 100, originalQty: 100, cost: 769235, shipping: 285717, price: 15000, month: 'Jul'}
+        ];
+
+        // PRELOADED HISTORICAL SALES LOGS ACROSS 2026 FOR DATE NAVIGATION DEMO
+        const defaultSales = [
+            {
+                id: 'sal_101',
+                date: '2026-01-15',
+                customer: 'Duka la Mwajuma',
+                paymentType: 'Cash / Taslimu',
+                items: [{itemId: 'inv_1', itemName: 'dera/bobo', quantity: 15, price: 25000, unitCost: 18995}],
+                total: 375000,
+                profit: 90074
+            },
+            {
+                id: 'sal_102',
+                date: '2026-02-10',
+                customer: 'Mama Kijacho Wholesale',
+                paymentType: 'M-Pesa / Tigo Pesa',
+                items: [{itemId: 'inv_2', itemName: 'magauni amoei', quantity: 10, price: 48000, unitCost: 42210}],
+                total: 480000,
+                profit: 57900
+            },
+            {
+                id: 'sal_103',
+                date: '2026-03-05',
+                customer: 'Mteja wa Rejareja',
+                paymentType: 'Cash / Taslimu',
+                items: [{itemId: 'inv_3', itemName: 'mashati shein', quantity: 40, price: 15000, unitCost: 10720}],
+                total: 600000,
+                profit: 171200
+            },
+            {
+                id: 'sal_104',
+                date: '2026-04-12',
+                customer: 'Kipata Boutique',
+                paymentType: 'NMB / CRDB Bank',
+                items: [{itemId: 'inv_13', itemName: 'sweta', quantity: 35, price: 15000, unitCost: 11275}],
+                total: 525000,
+                profit: 130375
+            },
+            {
+                id: 'sal_105',
+                date: '2026-07-20',
+                customer: 'Duka la Kariakoo',
+                paymentType: 'Cash / Taslimu',
+                items: [{itemId: 'inv_14', itemName: 't shirt linel trousers', quantity: 25, price: 15000, unitCost: 10550}],
+                total: 375000,
+                profit: 111250
+            },
+            {
+                id: 'sal_106',
+                date: '2026-09-10',
+                customer: 'Amina Traders',
+                paymentType: 'M-Pesa / Tigo Pesa',
+                items: [
+                    {itemId: 'inv_4', itemName: 'top mashati sketi blauyi mchanganyiko', quantity: 30, price: 12000, unitCost: 9519},
+                    {itemId: 'inv_8', itemName: 'straight buggy jeans', quantity: 5, price: 18000, unitCost: 12600}
+                ],
+                total: 450000,
+                profit: 101430
+            },
+            {
+                id: 'sal_107',
+                date: new Date().toISOString().split('T')[0], // TODAY'S SALE
+                customer: 'Wateja wa Leo',
+                paymentType: 'Cash / Taslimu',
+                items: [{itemId: 'inv_1', itemName: 'dera/bobo', quantity: 5, price: 25000, unitCost: 18995}],
+                total: 125000,
+                profit: 30025
+            }
+        ];
+
+        const defaultExpenses = [
+            {id: 'exp_1', date: '2026-01-30', category: 'Kodi ya Duka', amount: 150000, note: 'Kodi ya mwezi Jan'},
+            {id: 'exp_2', date: '2026-02-28', category: 'Umeme / Maji', amount: 35000, note: 'Luku duka la Kariakoo'},
+            {id: 'exp_3', date: '2026-04-15', category: 'Ufungashaji / Mifuko', amount: 25000, note: 'Mifuko ya Plastiki Jumla'},
+            {id: 'exp_4', date: '2026-07-05', category: 'Chakula / Posho', amount: 45000, note: 'Posho za upakuzi mzigo mpya'},
+            {id: 'exp_5', date: new Date().toISOString().split('T')[0], category: 'Usafiri wa Ndani', amount: 15000, note: 'Bajaji za mteja wa Mwanza'}
+        ];
+
+        const defaultSavedReports = [
+            {
+                id: 'rep_1001',
+                createdDate: '2026-08-31',
+                timeframe: 'Mwezi wa 8 (August 2026)',
+                totalRevenue: 2850000,
+                totalExpenses: 220000,
+                netProfit: 780000,
+                stockValuation: 8540000
+            }
+        ];
+
+        // APPLICATION GLOBAL STATE
+        let inventory = [];
+        let sales = [];
+        let expenses = [];
+        let savedReports = [];
+        let cart = [];
+
+        // Analytics Filter Variables
+        let analyticsTimeframe = 'month'; // 'today', 'week', 'month', 'year', 'all', 'custom'
+        let customStartDate = '';
+        let customEndDate = '';
+
+        // Chart instances
+        let financialChartInstance = null;
+        let profitTrendChartInstance = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+
+            // Display current date in ISO format
+            const today = new Date();
+            document.getElementById('currentDateDisplay').textContent = today.toLocaleDateString('sw-TZ', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+
+            // Default expense date
+            document.getElementById('expDate').value = today.toISOString().split('T')[0];
+        });
+
+        function initApp() {
+            // Load from localStorage or seed defaults
+            if (!localStorage.getItem('geno_pos_inventory_v3')) {
+                localStorage.setItem('geno_pos_inventory_v3', JSON.stringify(defaultInventory));
+            }
+            if (!localStorage.getItem('geno_pos_sales_v3')) {
+                localStorage.setItem('geno_pos_sales_v3', JSON.stringify(defaultSales));
+            }
+            if (!localStorage.getItem('geno_pos_expenses_v3')) {
+                localStorage.setItem('geno_pos_expenses_v3', JSON.stringify(defaultExpenses));
+            }
+            if (!localStorage.getItem('geno_pos_reports_v3')) {
+                localStorage.setItem('geno_pos_reports_v3', JSON.stringify(defaultSavedReports));
+            }
+
+            inventory = JSON.parse(localStorage.getItem('geno_pos_inventory_v3'));
+            sales = JSON.parse(localStorage.getItem('geno_pos_sales_v3'));
+            expenses = JSON.parse(localStorage.getItem('geno_pos_expenses_v3'));
+            savedReports = JSON.parse(localStorage.getItem('geno_pos_reports_v3'));
+
+            renderAll();
+        }
+
+        function saveData() {
+            localStorage.setItem('geno_pos_inventory_v3', JSON.stringify(inventory));
+            localStorage.setItem('geno_pos_sales_v3', JSON.stringify(sales));
+            localStorage.setItem('geno_pos_expenses_v3', JSON.stringify(expenses));
+            localStorage.setItem('geno_pos_reports_v3', JSON.stringify(savedReports));
+            renderAll();
+        }
+
+        function resetToInitialData() {
+            if (confirm('Je, una uhakika unataka kurejesha mfumo kwenye data zote za mwanzo? Miamala mipya uliyoweka itaondolewa.')) {
+                localStorage.setItem('geno_pos_inventory_v3', JSON.stringify(defaultInventory));
+                localStorage.setItem('geno_pos_sales_v3', JSON.stringify(defaultSales));
+                localStorage.setItem('geno_pos_expenses_v3', JSON.stringify(defaultExpenses));
+                localStorage.setItem('geno_pos_reports_v3', JSON.stringify(defaultSavedReports));
+                cart = [];
+                initApp();
+                showToast('Mfumo Umerejeshwa', 'Data zote za mwanzo zimepakiwa tena.', 'info');
+            }
+        }
+
+        function exportDataJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({inventory, sales, expenses, savedReports}));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Geno_Wholesale_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast('Pakua Imekamilika', 'Faili la backup limehifadhiwa.', 'success');
+        }
+
+        function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.inventory && importedData.sales && importedData.expenses) {
+                        inventory = importedData.inventory;
+                        sales = importedData.sales;
+                        expenses = importedData.expenses;
+                        savedReports = importedData.savedReports || [];
+                        saveData();
+                        showToast('Rejesho Limekamilika', 'Data zote zimeingizwa kikamilifu.', 'success');
+                    } else {
+                        showToast('Kosa la Faili', 'Faili la JSON halina mfumo sahihi wa data.', 'error');
+                    }
+                } catch (err) {
+                    showToast('Kosa la Kusoma', 'Hatujaweza kusoma faili uliloweka.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // UTILITY HELPER FUNCTIONS
+        function formatMoney(num) {
+            return 'TZS ' + Math.round(num || 0).toLocaleString();
+        }
+
+        function calculateUnitCost(itemObj) {
+            if (!itemObj || !itemObj.originalQty || itemObj.originalQty <= 0) return 0;
+            return (itemObj.cost + itemObj.shipping) / itemObj.originalQty;
+        }
+
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+
+            if (type === 'success') {
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-xl';
+                toast.className = 'fixed top-5 right-5 z-50 transition-all duration-300 ease-in-out max-w-sm glass px-5 py-4 rounded-xl border-l-4 border-emerald-500 shadow-2xl flex items-center space-x-3 opacity-100 translate-x-0';
+            } else {
+                toastIcon.className = 'fa-solid fa-triangle-exclamation text-rose-400 text-xl';
+                toast.className = 'fixed top-5 right-5 z-50 transition-all duration-300 ease-in-out max-w-sm glass px-5 py-4 rounded-xl border-l-4 border-rose-500 shadow-2xl flex items-center space-x-3 opacity-100 translate-x-0';
+            }
+
+            setTimeout(() => {
+                toast.className = 'fixed top-5 right-5 z-50 transition-all duration-300 ease-in-out max-w-sm glass px-5 py-4 rounded-xl border-l-4 border-emerald-500 shadow-2xl flex items-center space-x-3 opacity-0 translate-x-full';
+            }, 3500);
+        }
+
+        // UI NAVIGATION TAB SWITCHER
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-pink-600/20', 'text-pink-400', 'border', 'border-pink-500/30');
+                btn.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`section-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${tabName}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-pink-600/20', 'text-pink-400', 'border', 'border-pink-500/30');
+                activeBtn.classList.remove('text-slate-400');
+            }
+
+            if (tabName === 'analytics') {
+                renderAnalytics();
+            } else if (tabName === 'reports') {
+                renderSavedReportsTable();
+            }
+        }
+
+        function openModal(id) {document.getElementById(id).classList.remove('hidden');}
+        function closeModal(id) {document.getElementById(id).classList.add('hidden');}
+        function openAddInventoryModal() {openModal('modalAddInventory');}
+        function openAddExpenseModal() {openModal('modalAddExpense');}
+
+        // RENDER ALL DATA
+        function renderAll() {
+            renderPosGrid();
+            renderCartTable();
+            renderInventoryTable();
+            renderExpenseTable();
+            renderSalesHistoryTable();
+            renderSavedReportsTable();
+            renderAnalytics();
+        }
+
+        // POS GRID & CART LOGIC
+        function renderPosGrid() {
+            const grid = document.getElementById('posGridContainer');
+            const search = document.getElementById('posSearchInput').value.toLowerCase();
+            grid.innerHTML = '';
+
+            const filtered = inventory.filter(item => item.item.toLowerCase().includes(search));
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 py-8 text-center text-slate-500 text-xs">Hakuna bidhaa inayofanana na utafutaji wako.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const unitCost = calculateUnitCost(item);
+                const card = document.createElement('div');
+                const isOutOfStock = item.quantity <= 0;
+
+                card.className = `glass-card p-4 rounded-2xl border transition duration-200 hover:border-pink-500/50 flex flex-col justify-between ${isOutOfStock ? 'opacity-50 pointer-events-none' : ''}`;
+                card.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex justify-between items-start">
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-semibold">${item.month}</span>
+              <span class="text-xs font-bold ${item.quantity < 10 ? 'text-rose-400' : 'text-emerald-400'}">
+                ${item.quantity} Pcs Stoki
+              </span>
+            </div>
+            <h4 class="font-bold text-white text-sm capitalize pt-1">${item.item}</h4>
+            <p class="text-[11px] text-slate-400">Gharama / Pc: ${formatMoney(unitCost)}</p>
+          </div>
+
+          <div class="pt-3 mt-3 border-t border-slate-800 flex justify-between items-center">
+            <span class="text-sm font-extrabold text-pink-400">${formatMoney(item.price)}</span>
+            <button onclick="addToCart('${item.id}')" class="px-3 py-1.5 bg-pink-600 hover:bg-pink-500 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1 shadow-md shadow-pink-600/20">
+              <i class="fa-solid fa-plus text-[10px]"></i>
+              <span>Ongeza</span>
+            </button>
+          </div>
+        `;
+                grid.appendChild(card);
+            });
+        }
+
+        function addToCart(itemId) {
+            const item = inventory.find(i => i.id === itemId);
+            if (!item || item.quantity <= 0) return;
+
+            const existingCartIndex = cart.findIndex(c => c.itemId === itemId);
+            if (existingCartIndex > -1) {
+                if (cart[existingCartIndex].quantity + 1 > item.quantity) {
+                    showToast('Ukomo wa Stoki', 'Huwezi kuongeza idadi kuzidi iliyopo stoki.', 'error');
+                    return;
+                }
+                cart[existingCartIndex].quantity += 1;
+            } else {
+                const unitCost = calculateUnitCost(item);
+                cart.push({
+                    itemId: item.id,
+                    itemName: item.item,
+                    quantity: 1,
+                    price: item.price,
+                    unitCost: unitCost,
+                    maxStock: item.quantity
+                });
+            }
+
+            renderCartTable();
+        }
+
+        function updateCartQty(index, newQty) {
+            const qty = parseInt(newQty);
+            if (isNaN(qty) || qty <= 0) {
+                cart.splice(index, 1);
+            } else {
+                if (qty > cart[index].maxStock) {
+                    showToast('Ukomo wa Stoki', `Stoki iliyopo ni ${cart[index].maxStock} Pcs pekee.`, 'error');
+                    cart[index].quantity = cart[index].maxStock;
+                } else {
+                    cart[index].quantity = qty;
+                }
+            }
+            renderCartTable();
+        }
+
+        function updateCartPrice(index, newPrice) {
+            const price = parseFloat(newPrice);
+            if (!isNaN(price) && price >= 0) {
+                cart[index].price = price;
+            }
+            renderCartTable();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCartTable();
+        }
+
+        function clearCart() {
+            cart = [];
+            renderCartTable();
+        }
+
+        function renderCartTable() {
+            const tbody = document.getElementById('cartTableBody');
+            const emptyMsg = document.getElementById('emptyCartMessage');
+            tbody.innerHTML = '';
+
+            if (cart.length === 0) {
+                emptyMsg.classList.remove('hidden');
+            } else {
+                emptyMsg.classList.add('hidden');
+            }
+
+            let grandTotal = 0;
+            let totalEstProfit = 0;
+            let totalItemsPcs = 0;
+
+            cart.forEach((c, idx) => {
+                const lineTotal = c.quantity * c.price;
+                const lineProfit = lineTotal - (c.unitCost * c.quantity);
+
+                grandTotal += lineTotal;
+                totalEstProfit += lineProfit;
+                totalItemsPcs += c.quantity;
+
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-slate-800/50';
+                tr.innerHTML = `
+          <td class="py-2 font-medium text-white capitalize">
+            ${c.itemName}
+            <span class="block text-[9px] text-slate-400">Gharama: ${formatMoney(c.unitCost)}</span>
+          </td>
+          <td class="py-2 text-center">
+            <input type="number" min="1" value="${c.quantity}" onchange="updateCartQty(${idx}, this.value)" class="w-12 p-1 bg-slate-900 border border-slate-700 rounded text-center text-xs text-white focus:outline-none">
+          </td>
+          <td class="py-2 text-right">
+            <input type="number" min="0" value="${c.price}" onchange="updateCartPrice(${idx}, this.value)" class="w-20 p-1 bg-slate-900 border border-slate-700 rounded text-right text-xs text-pink-400 focus:outline-none">
+          </td>
+          <td class="py-2 text-right font-bold text-white">${formatMoney(lineTotal)}</td>
+          <td class="py-2 text-center">
+            <button onclick="removeFromCart(${idx})" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-xmark"></i></button>
+          </td>
+        `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('cartGrandTotal').textContent = formatMoney(grandTotal);
+            document.getElementById('cartEstimatedProfit').textContent = formatMoney(totalEstProfit);
+            document.getElementById('cartTotalItems').textContent = `${totalItemsPcs} Pcs`;
+        }
+
+        function checkoutCart() {
+            if (cart.length === 0) {
+                showToast('Kikapu kiko wazi', 'Chagua angalau bidhaa moja kabla ya kukamilisha mauzo.', 'error');
+                return;
+            }
+
+            const paymentType = document.getElementById('posPaymentType').value;
+            const customer = document.getElementById('posCustomerName').value.trim() || 'Mteja wa Kawaida';
+
+            let totalAmount = 0;
+            let totalProfit = 0;
+
+            // Deduct from Inventory & Calculate totals
+            cart.forEach(cartItem => {
+                const invItem = inventory.find(i => i.id === cartItem.itemId);
+                if (invItem) {
+                    invItem.quantity -= cartItem.quantity;
+                }
+                const itemTotal = cartItem.quantity * cartItem.price;
+                const itemProfit = itemTotal - (cartItem.unitCost * cartItem.quantity);
+                totalAmount += itemTotal;
+                totalProfit += itemProfit;
+            });
+
+            const newSaleRecord = {
+                id: 'sal_' + Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                customer: customer,
+                paymentType: paymentType,
+                items: JSON.parse(JSON.stringify(cart)),
+                total: totalAmount,
+                profit: totalProfit
+            };
+
+            sales.unshift(newSaleRecord);
+            saveData();
+
+            // Launch Printable Receipt Modal
+            populateReceiptModal(newSaleRecord);
+            openModal('modalReceipt');
+
+            // Reset cart and UI
+            cart = [];
+            document.getElementById('posCustomerName').value = '';
+            renderCartTable();
+            showToast('Mauzo Yamekamilika', 'Mwamala umerekodiwa na risiti imeandaliwa.', 'success');
+        }
+
+        function populateReceiptModal(saleObj) {
+            document.getElementById('receiptDate').textContent = `Tarehe: ${saleObj.date}`;
+            document.getElementById('receiptNumber').textContent = `Risiti No: #${saleObj.id.toUpperCase()}`;
+            document.getElementById('receiptCustomer').textContent = `Mteja: ${saleObj.customer}`;
+            document.getElementById('receiptPayment').textContent = `Njia: ${saleObj.paymentType}`;
+
+            const tbody = document.getElementById('receiptItemsBody');
+            tbody.innerHTML = '';
+
+            saleObj.items.forEach(it => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-slate-200';
+                tr.innerHTML = `
+          <td class="py-1 capitalize">${it.itemName}</td>
+          <td class="py-1 text-center">${it.quantity}</td>
+          <td class="py-1 text-right">${formatMoney(it.price * it.quantity)}</td>
+        `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('receiptGrandTotal').textContent = `JUMLA: ${formatMoney(saleObj.total)}`;
+        }
+
+        // INVENTORY MANAGEMENT LOGIC
+        function renderInventoryTable() {
+            const tbody = document.getElementById('inventoryTableBody');
+            const search = document.getElementById('inventorySearch')?.value.toLowerCase() || '';
+            tbody.innerHTML = '';
+
+            const filtered = inventory.filter(i => i.item.toLowerCase().includes(search));
+
+            filtered.forEach(item => {
+                const unitCost = calculateUnitCost(item);
+                const estProfitPerUnit = item.price - unitCost;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-900/50 transition';
+                tr.innerHTML = `
+          <td class="p-3 font-bold text-white capitalize">${item.item}</td>
+          <td class="p-3"><span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-semibold">${item.month}</span></td>
+          <td class="p-3 text-center font-extrabold ${item.quantity < 10 ? 'text-rose-400' : 'text-emerald-400'}">${item.quantity} / ${item.originalQty} Pcs</td>
+          <td class="p-3 text-slate-300">${formatMoney(item.cost)}</td>
+          <td class="p-3 text-slate-400">${formatMoney(item.shipping)}</td>
+          <td class="p-3 font-medium text-amber-400">${formatMoney(unitCost)}</td>
+          <td class="p-3 font-bold text-pink-400">${formatMoney(item.price)}</td>
+          <td class="p-3 font-bold text-emerald-400">${formatMoney(estProfitPerUnit)}</td>
+          <td class="p-3 text-right space-x-1">
+            <button onclick="openEditInventoryModal('${item.id}')" class="text-pink-400 hover:text-pink-300 p-1" title="Badili Bei au Mzigo">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button onclick="deleteInventoryItem('${item.id}')" class="text-rose-400 hover:text-rose-300 p-1" title="Futa">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openEditInventoryModal(id) {
+            const item = inventory.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('editInvId').value = item.id;
+            document.getElementById('editInvItemName').value = item.item;
+            document.getElementById('editInvQuantity').value = item.quantity;
+            document.getElementById('editInvMonth').value = item.month;
+            document.getElementById('editInvCost').value = item.cost;
+            document.getElementById('editInvShipping').value = item.shipping;
+            document.getElementById('editInvSellingPrice').value = item.price;
+
+            openModal('modalEditInventory');
+        }
+
+        function handleEditInventorySubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('editInvId').value;
+            const item = inventory.find(i => i.id === id);
+            if (!item) return;
+
+            item.item = document.getElementById('editInvItemName').value.trim();
+            item.quantity = parseInt(document.getElementById('editInvQuantity').value);
+            item.month = document.getElementById('editInvMonth').value.trim();
+            item.cost = parseFloat(document.getElementById('editInvCost').value);
+            item.shipping = parseFloat(document.getElementById('editInvShipping').value) || 0;
+            item.price = parseFloat(document.getElementById('editInvSellingPrice').value);
+
+            saveData();
+            closeModal('modalEditInventory');
+            showToast('Stoki Imesasishwa', 'Taarifa za bei na mzigo zimebadilishwa kikamilifu.', 'success');
+        }
+
+        function handleInventorySubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('invItemName').value.trim();
+            const qty = parseInt(document.getElementById('invQuantity').value);
+            const month = document.getElementById('invMonth').value;
+            const cost = parseFloat(document.getElementById('invCost').value);
+            const shipping = parseFloat(document.getElementById('invShipping').value) || 0;
+            const price = parseFloat(document.getElementById('invSellingPrice').value);
+
+            const newItem = {
+                id: 'inv_' + Date.now(),
+                item: name,
+                quantity: qty,
+                originalQty: qty,
+                cost: cost,
+                shipping: shipping,
+                price: price,
+                month: month
+            };
+
+            inventory.push(newItem);
+            saveData();
+            closeModal('modalAddInventory');
+            document.getElementById('inventoryForm').reset();
+            showToast('Stoki Imeongezwa', 'Mzigo mpya umesajiliwa kwenye stoki.', 'success');
+        }
+
+        function deleteInventoryItem(id) {
+            if (confirm('Je, una uhakika unataka kufuta bidhaa hii kwenye mfumo wa stoki?')) {
+                inventory = inventory.filter(i => i.id !== id);
+                saveData();
+                showToast('Bidhaa Imefutwa', 'Stoki imeondolewa kikamilifu.', 'success');
+            }
+        }
+
+        // EXPENSE MANAGEMENT LOGIC
+        function renderExpenseTable() {
+            const tbody = document.getElementById('expenseTableBody');
+            const breakdownContainer = document.getElementById('expenseCategoryBreakdown');
+            tbody.innerHTML = '';
+            breakdownContainer.innerHTML = '';
+
+            let totalExp = 0;
+            const categoryTotals = {};
+
+            expenses.forEach(exp => {
+                totalExp += exp.amount;
+                categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + exp.amount;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-900/50 transition';
+                tr.innerHTML = `
+          <td class="p-3 text-slate-400">${exp.date}</td>
+          <td class="p-3 font-semibold text-white">${exp.category}</td>
+          <td class="p-3 text-slate-400">${exp.note || '-'}</td>
+          <td class="p-3 text-right font-bold text-rose-400">${formatMoney(exp.amount)}</td>
+          <td class="p-3 text-right">
+            <button onclick="deleteExpense('${exp.id}')" class="text-rose-400 hover:text-rose-300 p-1">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        `;
+                tbody.appendChild(tr);
+            });
+
+            // Render Category Progress Breakdown
+            Object.keys(categoryTotals).forEach(cat => {
+                const amount = categoryTotals[cat];
+                const percent = totalExp > 0 ? Math.round((amount / totalExp) * 100) : 0;
+
+                const div = document.createElement('div');
+                div.className = 'space-y-1';
+                div.innerHTML = `
+          <div class="flex justify-between text-xs">
+            <span class="text-slate-300 font-medium">${cat}</span>
+            <span class="text-rose-400 font-bold">${formatMoney(amount)} (${percent}%)</span>
+          </div>
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bg-rose-500 rounded-full" style="width: ${percent}%"></div>
+          </div>
+        `;
+                breakdownContainer.appendChild(div);
+            });
+        }
+
+        function handleExpenseSubmit(e) {
+            e.preventDefault();
+            const cat = document.getElementById('expCategory').value;
+            const amount = parseFloat(document.getElementById('expAmount').value);
+            const date = document.getElementById('expDate').value;
+            const note = document.getElementById('expNote').value.trim();
+
+            const newExpense = {
+                id: 'exp_' + Date.now(),
+                date: date,
+                category: cat,
+                amount: amount,
+                note: note
+            };
+
+            expenses.unshift(newExpense);
+            saveData();
+            closeModal('modalAddExpense');
+            document.getElementById('expenseForm').reset();
+            document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+            showToast('Matumizi Yamehifadhiwa', 'Gharama za duka zimeingizwa kikamilifu.', 'success');
+        }
+
+        function deleteExpense(id) {
+            if (confirm('Je, una uhakika unataka kufuta kumbukumbu hii ya matumizi?')) {
+                expenses = expenses.filter(e => e.id !== id);
+                saveData();
+                showToast('Matumizi Yamefutwa', 'Kumbukumbu imeondolewa.', 'success');
+            }
+        }
+
+        // SALES HISTORY LOG TABLE
+        function renderSalesHistoryTable() {
+            const tbody = document.getElementById('salesHistoryTableBody');
+            const search = document.getElementById('salesHistorySearch')?.value.toLowerCase() || '';
+            tbody.innerHTML = '';
+
+            const filtered = sales.filter(s =>
+                s.customer.toLowerCase().includes(search) ||
+                s.items.some(i => i.itemName.toLowerCase().includes(search))
+            );
+
+            filtered.forEach(s => {
+                const totalPcs = s.items.reduce((acc, curr) => acc + curr.quantity, 0);
+                const itemNames = s.items.map(i => `${i.itemName} (${i.quantity} Pcs)`).join(', ');
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-900/50 transition';
+                tr.innerHTML = `
+          <td class="p-3">
+            <span class="font-bold text-white block">#${s.id.slice(-6).toUpperCase()}</span>
+            <span class="text-[10px] text-slate-400">${s.date}</span>
+          </td>
+          <td class="p-3">
+            <span class="font-medium text-slate-200 block">${s.customer}</span>
+            <span class="text-[10px] text-pink-400">${s.paymentType}</span>
+          </td>
+          <td class="p-3 text-slate-300 capitalize max-w-xs truncate">${itemNames}</td>
+          <td class="p-3 text-center font-bold text-slate-200">${totalPcs}</td>
+          <td class="p-3 font-bold text-emerald-400">${formatMoney(s.total)}</td>
+          <td class="p-3 font-bold text-pink-400">${formatMoney(s.profit)}</td>
+          <td class="p-3 text-right space-x-1">
+            <button onclick='reprintReceipt(${JSON.stringify(s)})' class="text-pink-400 hover:text-pink-300 p-1">
+              <i class="fa-solid fa-receipt"></i>
+            </button>
+            <button onclick="deleteSale('${s.id}')" class="text-rose-400 hover:text-rose-300 p-1">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function reprintReceipt(saleObj) {
+            populateReceiptModal(saleObj);
+            openModal('modalReceipt');
+        }
+
+        function deleteSale(id) {
+            if (confirm('Je, una uhakika unataka kufuta rekodi hii ya mauzo?')) {
+                sales = sales.filter(s => s.id !== id);
+                saveData();
+                showToast('Mauzo Yamefutwa', 'Rekodi imeondolewa.', 'success');
+            }
+        }
+
+        // PDF GENERATION & SAVED REPORTS ENGINE
+        function renderSavedReportsTable() {
+            const tbody = document.getElementById('savedReportsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (savedReports.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Hakuna ripoti zilizohifadhiwa bado. Bonyeza "Tengeneza Ripoti Mpya" kuanza.</td></tr>`;
+                return;
+            }
+
+            savedReports.forEach(rep => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-900/50 transition';
+                tr.innerHTML = `
+          <td class="p-3">
+            <span class="font-bold text-white block">#${rep.id.slice(-6).toUpperCase()}</span>
+            <span class="text-[10px] text-slate-400">${rep.createdDate}</span>
+          </td>
+          <td class="p-3 font-medium text-pink-400">${rep.timeframe}</td>
+          <td class="p-3 font-bold text-emerald-400">${formatMoney(rep.totalRevenue)}</td>
+          <td class="p-3 font-bold text-pink-400">${formatMoney(rep.netProfit)}</td>
+          <td class="p-3 font-bold text-amber-400">${formatMoney(rep.totalExpenses)}</td>
+          <td class="p-3 text-right space-x-2">
+            <button onclick="downloadReportPDF('${rep.id}')" class="px-2.5 py-1 bg-pink-600 hover:bg-pink-500 text-white rounded-lg text-xs font-bold transition">
+              <i class="fa-solid fa-file-pdf mr-1"></i> PDF
+            </button>
+            <button onclick="deleteSavedReport('${rep.id}')" class="text-rose-400 hover:text-rose-300 p-1">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function generateAndSavePDFReport() {
+            const filteredSales = filterDataByDateRange(sales);
+            const filteredExpenses = filterDataByDateRange(expenses);
+
+            const totalRevenue = filteredSales.reduce((acc, s) => acc + s.total, 0);
+            const grossProfitFromSales = filteredSales.reduce((acc, s) => acc + s.profit, 0);
+            const totalCOGS = totalRevenue - grossProfitFromSales;
+            const totalExpensesAmount = filteredExpenses.reduce((acc, e) => acc + e.amount, 0);
+            const netProfit = grossProfitFromSales - totalExpensesAmount;
+            const totalRemainingStockValue = inventory.reduce((acc, i) => acc + (calculateUnitCost(i) * i.quantity), 0);
+
+            const timeframeText = analyticsTimeframe === 'today' ? 'Leo' :
+                analyticsTimeframe === 'week' ? 'Wiki Hii' :
+                    analyticsTimeframe === 'month' ? 'Mwezi Huu' :
+                        analyticsTimeframe === 'year' ? 'Mwaka Mzima' : 'Muda Wote';
+
+            const reportRecord = {
+                id: 'rep_' + Date.now(),
+                createdDate: new Date().toISOString().split('T')[0],
+                timeframe: timeframeText,
+                totalRevenue: totalRevenue,
+                totalCOGS: totalCOGS,
+                totalExpenses: totalExpensesAmount,
+                netProfit: netProfit,
+                stockValuation: totalRemainingStockValue
+            };
+
+            savedReports.unshift(reportRecord);
+            saveData();
+
+            // Download PDF immediately
+            downloadReportPDF(reportRecord.id);
+            showToast('Ripoti Imetengenezwa', 'Ripoti mpya imehifadhiwa na kupakuliwa.', 'success');
+        }
+
+        function downloadReportPDF(reportId) {
+            const rep = savedReports.find(r => r.id === reportId);
+            if (!rep) return;
+
+            document.getElementById('pdfReportGeneratedDate').textContent = `Tarehe ya Kutengenezwa: ${rep.createdDate}`;
+            document.getElementById('pdfReportTimeframe').textContent = `Kipindi: ${rep.timeframe}`;
+            document.getElementById('pdfPdfRevenue').textContent = formatMoney(rep.totalRevenue);
+            document.getElementById('pdfPdfCOGS').textContent = formatMoney(rep.totalCOGS);
+            document.getElementById('pdfPdfExpenses').textContent = formatMoney(rep.totalExpenses);
+            document.getElementById('pdfPdfNetProfit').textContent = formatMoney(rep.netProfit);
+            document.getElementById('pdfPdfStockValue').textContent = formatMoney(rep.stockValuation);
+
+            const element = document.getElementById('pdfReportTemplate');
+            element.classList.remove('hidden');
+
+            const opt = {
+                margin: 0.5,
+                filename: `Geno_Financial_Report_${rep.id}.pdf`,
+                image: {type: 'jpeg', quality: 0.98},
+                html2canvas: {scale: 2},
+                jsPDF: {unit: 'in', format: 'letter', orientation: 'portrait'}
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.add('hidden');
+            });
+        }
+
+        function deleteSavedReport(id) {
+            if (confirm('Je, una uhakika unataka kufuta ripoti hii kutoka kwenye hifadhi?')) {
+                savedReports = savedReports.filter(r => r.id !== id);
+                saveData();
+                showToast('Ripoti Imefutwa', 'Kumbukumbu ya ripoti imeondolewa.', 'success');
+            }
+        }
+
+        // ANALYTICS & TIMEFRAME FILTERING LOGIC
+        function setAnalyticsTimeframe(timeframe) {
+            analyticsTimeframe = timeframe;
+            document.querySelectorAll('.analytics-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-pink-600', 'text-white');
+                btn.classList.add('bg-slate-800', 'text-slate-300');
+            });
+
+            const activeBtn = document.getElementById(`filter-${timeframe}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-pink-600', 'text-white');
+                activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
+            }
+
+            // Clear custom date inputs if preset selected
+            document.getElementById('analyticsStartDate').value = '';
+            document.getElementById('analyticsEndDate').value = '';
+
+            renderAnalytics();
+        }
+
+        function applyCustomDateFilter() {
+            const start = document.getElementById('analyticsStartDate').value;
+            const end = document.getElementById('analyticsEndDate').value;
+
+            if (start && end) {
+                analyticsTimeframe = 'custom';
+                customStartDate = start;
+                customEndDate = end;
+
+                document.querySelectorAll('.analytics-filter-btn').forEach(btn => {
+                    btn.classList.remove('bg-pink-600', 'text-white');
+                    btn.classList.add('bg-slate-800', 'text-slate-300');
+                });
+
+                renderAnalytics();
+            }
+        }
+
+        function filterDataByDateRange(dataArray) {
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+
+            return dataArray.filter(item => {
+                const itemDate = new Date(item.date);
+
+                if (analyticsTimeframe === 'today') {
+                    return item.date === todayStr;
+                } else if (analyticsTimeframe === 'week') {
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(now.getDate() - 7);
+                    return itemDate >= oneWeekAgo && itemDate <= now;
+                } else if (analyticsTimeframe === 'month') {
+                    return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+                } else if (analyticsTimeframe === 'year') {
+                    return itemDate.getFullYear() === now.getFullYear();
+                } else if (analyticsTimeframe === 'custom') {
+                    if (!customStartDate || !customEndDate) return true;
+                    return item.date >= customStartDate && item.date <= customEndDate;
+                }
+                return true; // 'all'
+            });
+        }
+
+        function renderAnalytics() {
+            const filteredSales = filterDataByDateRange(sales);
+            const filteredExpenses = filterDataByDateRange(expenses);
+
+            // Total Revenue & COGS Calculations
+            const totalRevenue = filteredSales.reduce((acc, s) => acc + s.total, 0);
+            const grossProfitFromSales = filteredSales.reduce((acc, s) => acc + s.profit, 0);
+            const totalCOGS = totalRevenue - grossProfitFromSales;
+            const totalExpensesAmount = filteredExpenses.reduce((acc, e) => acc + e.amount, 0);
+            const netProfit = grossProfitFromSales - totalExpensesAmount;
+
+            // Valuation of remaining stock
+            const totalRemainingStockValue = inventory.reduce((acc, i) => acc + (calculateUnitCost(i) * i.quantity), 0);
+
+            // Populate Metric Cards
+            document.getElementById('cardTotalRevenue').textContent = formatMoney(totalRevenue);
+            document.getElementById('cardTotalCostOfGoods').textContent = formatMoney(totalCOGS);
+            document.getElementById('cardTotalExpenses').textContent = formatMoney(totalExpensesAmount);
+            document.getElementById('cardNetProfit').textContent = formatMoney(netProfit);
+            document.getElementById('cardRemainingStockValue').textContent = formatMoney(totalRemainingStockValue);
+
+            // Generate Charts
+            renderFinancialChart(filteredSales, filteredExpenses);
+            renderProfitTrendChart(filteredSales, filteredExpenses);
+        }
+
+        function renderFinancialChart(filteredSales, filteredExpenses) {
+            const ctx = document.getElementById('financialChart').getContext('2d');
+            if (financialChartInstance) financialChartInstance.destroy();
+
+            // Aggregate Monthly or Custom Data
+            const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthlyRevenue = new Array(12).fill(0);
+            const monthlyCosts = new Array(12).fill(0);
+
+            filteredSales.forEach(s => {
+                const m = new Date(s.date).getMonth();
+                monthlyRevenue[m] += s.total;
+                monthlyCosts[m] += (s.total - s.profit);
+            });
+
+            filteredExpenses.forEach(e => {
+                const m = new Date(e.date).getMonth();
+                monthlyCosts[m] += e.amount;
+            });
+
+            financialChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: monthLabels,
+                    datasets: [
+                        {
+                            label: 'Mapato (Revenue)',
+                            data: monthlyRevenue,
+                            backgroundColor: '#10b981',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Gharama + Matumizi (Costs)',
+                            data: monthlyCosts,
+                            backgroundColor: '#f43f5e',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {labels: {color: '#94a3b8', font: {family: 'Inter', size: 11}}}
+                    },
+                    scales: {
+                        x: {ticks: {color: '#94a3b8'}, grid: {color: 'rgba(255,255,255,0.05)'}},
+                        y: {ticks: {color: '#94a3b8'}, grid: {color: 'rgba(255,255,255,0.05)'}}
+                    }
+                }
+            });
+        }
+
+        function renderProfitTrendChart(filteredSales, filteredExpenses) {
+            const ctx = document.getElementById('profitTrendChart').getContext('2d');
+            if (profitTrendChartInstance) profitTrendChartInstance.destroy();
+
+            const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthlyNetProfit = new Array(12).fill(0);
+
+            filteredSales.forEach(s => {
+                const m = new Date(s.date).getMonth();
+                monthlyNetProfit[m] += s.profit;
+            });
+
+            filteredExpenses.forEach(e => {
+                const m = new Date(e.date).getMonth();
+                monthlyNetProfit[m] -= e.amount;
+            });
+
+            profitTrendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthLabels,
+                    datasets: [
+                        {
+                            label: 'Faida Halisi (Net Profit)',
+                            data: monthlyNetProfit,
+                            borderColor: '#ec4899',
+                            backgroundColor: 'rgba(236, 72, 153, 0.15)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#ec4899'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {labels: {color: '#94a3b8', font: {family: 'Inter', size: 11}}}
+                    },
+                    scales: {
+                        x: {ticks: {color: '#94a3b8'}, grid: {color: 'rgba(255,255,255,0.05)'}},
+                        y: {ticks: {color: '#94a3b8'}, grid: {color: 'rgba(255,255,255,0.05)'}}
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
