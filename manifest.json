@@ -1,23 +1,15 @@
 {
-    "short_name": "AppYangu",
-    "name": "Jina Kamili la App",
+    "name": "Geno Wholesale POS",
+    "short_name": "Geno POS",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#f3e8ff",
+    "theme_color": "#007bff",
     "icons": [
         {
-            "src": "logo.png",
-            "type": "image/png",
+            "src": "https://i.ibb.co/tpfyVwNZ/Gemini-Generated-Image-qx8w23qx8w23qx8w.jpg",
             "sizes": "192x192",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "logo.png",
-            "type": "image/png",
-            "sizes": "512x512",
-            "purpose": "any maskable"
+            "type": "image/jpeg"
         }
-    ],
-    "start_url": "./index.html",
-    "background_color": "#ffffff",
-    "theme_color": "#007bff",
-    "display": "standalone",
-    "orientation": "portrait"
+    ]
 }
