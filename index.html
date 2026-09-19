@@ -1673,7 +1673,7 @@
           <td class="p-3.5 text-purple-800 font-semibold">${exp.note || '-'}</td>
           <td class="p-3.5 text-right font-black text-red-600">${formatMoney(exp.amount)}</td>
           <td class="p-3.5 text-right">
-            <button onclick="deleteExpense('${exp.id}')" class="text-red-600 hover:text-red-800 p-1">
+            <button onclick="deleteExpense('${exp.id}')" class="text-red-600 hover:text-red-800 p-1 rounded hover:bg-purple-200" title="Futa Matumizi">
               <i class="fa-solid fa-trash text-base"></i>
             </button>
           </td>
@@ -1681,54 +1681,145 @@
                 tbody.appendChild(tr);
             });
 
-            Object.keys(categoryTotals).forEach(cat => {
-                const amount = categoryTotals[cat];
-                const percent = totalExp > 0 ? Math.round((amount / totalExp) * 100) : 0;
-
-                const div = document.createElement('div');
-                div.className = 'space-y-1.5';
-                div.innerHTML = `
-          <div class="flex justify-between text-xs sm:text-sm">
-            <span class="text-purple-900 font-bold">${cat}</span>
-            <span class="text-red-600 font-black">${formatMoney(amount)} (${percent}%)</span>
-          </div>
-          <div class="w-full bg-purple-100 h-2 rounded-full overflow-hidden">
-            <div class="bg-red-500 h-2 rounded-full" style="width: ${percent}%"></div>
-          </div>
-        `;
-                breakdownContainer.appendChild(div);
-            });
+            // Render Category Breakdown
+            if (Object.keys(categoryTotals).length === 0) {
+                breakdownContainer.innerHTML = `<p class="text-xs text-purple-600 font-bold">Hakuna rekodi za matumizi bado.</p>`;
+            } else {
+                for (const [cat, amt] of Object.entries(categoryTotals)) {
+                    const percentage = totalExp > 0 ? Math.round((amt / totalExp) * 100) : 0;
+                    const catEl = document.createElement('div');
+                    catEl.className = 'space-y-1';
+                    catEl.innerHTML = `
+            <div class="flex justify-between text-xs font-bold">
+              <span class="text-purple-900">${cat}</span>
+              <span class="text-red-600 font-black">${formatMoney(amt)} (${percentage}%)</span>
+            </div>
+            <div class="w-full bg-purple-100 h-2 rounded-full overflow-hidden">
+              <div class="bg-red-500 h-full rounded-full" style="width: ${percentage}%"></div>
+            </div>
+          `;
+                    breakdownContainer.appendChild(catEl);
+                }
+            }
         }
 
         function handleExpenseSubmit(e) {
             e.preventDefault();
             const cat = document.getElementById('expCategory').value;
             const amt = parseFloat(document.getElementById('expAmount').value);
-            const dt = document.getElementById('expDate').value;
-            const nt = document.getElementById('expNote').value.trim();
+            const date = document.getElementById('expDate').value;
+            const note = document.getElementById('expNote').value.trim();
 
-            const newExp = {
+            const newExpense = {
                 id: 'exp_' + Date.now(),
                 category: cat,
                 amount: amt,
-                date: dt,
-                note: nt
+                date: date,
+                note: note
             };
 
-            expenses.unshift(newExp);
+            expenses.unshift(newExpense);
             saveData();
             closeModal('modalAddExpense');
             document.getElementById('expenseForm').reset();
-            if (document.getElementById('expDate')) document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-            showToast('Matumizi Yamehifadhiwa', 'Gharama mpya imerekodiwa kikamilifu.', 'success');
+            document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+            showToast('Matumizi Yamehifadhiwa', 'Gharama imerekodiwa kikamilifu.', 'success');
         }
 
         function deleteExpense(id) {
-            if (confirm('Je, una uhakika unataka kufuta kumbukumbu hii ya matumizi?')) {
+            if (confirm('Je, una uhakika unataka kufuta rekodi hii ya matumizi?')) {
                 expenses = expenses.filter(e => e.id !== id);
                 saveData();
-                showToast('Kumbukumbu Imefutwa', 'Gharama imeondolewa kwenye mfumo.', 'success');
+                showToast('Matumizi Yamefutwa', 'Rekodi imeondolewa.', 'success');
             }
+        }
+
+        function setAnalyticsTimeframe(tf) {
+            analyticsTimeframe = tf;
+            document.querySelectorAll('.analytics-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-purple-700', 'text-white');
+                btn.classList.add('bg-purple-100', 'text-purple-900');
+            });
+            const activeBtn = document.getElementById(`filter-${tf}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-purple-700', 'text-white');
+                activeBtn.classList.remove('bg-purple-100', 'text-purple-900');
+            }
+            renderAnalytics();
+        }
+
+        function applyCustomDateFilter() {
+            customStartDate = document.getElementById('analyticsStartDate').value;
+            customEndDate = document.getElementById('analyticsEndDate').value;
+            if (customStartDate || customEndDate) {
+                analyticsTimeframe = 'custom';
+                document.querySelectorAll('.analytics-filter-btn').forEach(btn => {
+                    btn.classList.remove('bg-purple-700', 'text-white');
+                    btn.classList.add('bg-purple-100', 'text-purple-900');
+                });
+            }
+            renderAnalytics();
+        }
+
+        function filterByDate(items) {
+            const today = new Date();
+
+            return items.filter(item => {
+                const itemDate = new Date(item.date);
+
+                if (analyticsTimeframe === 'today') {
+                    return itemDate.toDateString() === today.toDateString();
+                } else if (analyticsTimeframe === 'week') {
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(today.getDate() - 7);
+                    return itemDate >= oneWeekAgo && itemDate <= today;
+                } else if (analyticsTimeframe === 'month') {
+                    return itemDate.getMonth() === today.getMonth() && itemDate.getFullYear() === today.getFullYear();
+                } else if (analyticsTimeframe === 'year') {
+                    return itemDate.getFullYear() === today.getFullYear();
+                } else if (analyticsTimeframe === 'custom') {
+                    let valid = true;
+                    if (customStartDate) valid = valid && itemDate >= new Date(customStartDate);
+                    if (customEndDate) valid = valid && itemDate <= new Date(customEndDate);
+                    return valid;
+                }
+                return true; // 'all'
+            });
+        }
+
+        function renderAnalytics() {
+            const filteredSales = filterByDate(sales);
+            const filteredExpenses = filterByDate(expenses);
+
+            let totalRev = 0;
+            let totalProfitFromSales = 0;
+
+            filteredSales.forEach(s => {
+                totalRev += s.total;
+                totalProfitFromSales += s.profit;
+            });
+
+            const totalCOGS = totalRev - totalProfitFromSales;
+
+            let totalExp = 0;
+            filteredExpenses.forEach(e => {
+                totalExp += e.amount;
+            });
+
+            const netProfit = totalProfitFromSales - totalExp;
+
+            // Stock Remaining Value
+            let totalRemainingStockVal = 0;
+            inventory.forEach(inv => {
+                const unitCost = calculateUnitCost(inv);
+                totalRemainingStockVal += (inv.quantity * unitCost);
+            });
+
+            if (document.getElementById('cardTotalRevenue')) document.getElementById('cardTotalRevenue').textContent = formatMoney(totalRev);
+            if (document.getElementById('cardTotalCostOfGoods')) document.getElementById('cardTotalCostOfGoods').textContent = formatMoney(totalCOGS);
+            if (document.getElementById('cardTotalExpenses')) document.getElementById('cardTotalExpenses').textContent = formatMoney(totalExp);
+            if (document.getElementById('cardNetProfit')) document.getElementById('cardNetProfit').textContent = formatMoney(netProfit);
+            if (document.getElementById('cardRemainingStockValue')) document.getElementById('cardRemainingStockValue').textContent = formatMoney(totalRemainingStockVal);
         }
 
         function renderSalesHistoryTable() {
@@ -1738,32 +1829,41 @@
 
             const filtered = sales.filter(s =>
                 s.customer.toLowerCase().includes(search) ||
+                s.id.toLowerCase().includes(search) ||
                 s.items.some(i => i.itemName.toLowerCase().includes(search))
             );
 
-            filtered.forEach((sale, idx) => {
-                const totalPcs = sale.items.reduce((sum, item) => sum + item.quantity, 0);
-                const itemsNames = sale.items.map(i => `${i.itemName} (${i.quantity})`).join(', ');
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-purple-600 font-bold">Hakuna kumbukumbu za mauzo zilizopatikana.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((s, idx) => {
+                const totalItemsPcs = s.items.reduce((acc, curr) => acc + curr.quantity, 0);
+                const itemsSummary = s.items.map(i => `${i.itemName} (${i.quantity})`).join(', ');
 
                 const tr = document.createElement('tr');
                 const rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-purple-50/50';
                 tr.className = `${rowBg} hover:bg-purple-100/50 transition border-b border-purple-100`;
                 tr.innerHTML = `
-          <td class="p-3.5">
-            <span class="font-black text-purple-950 block">#${sale.id.toUpperCase()}</span>
-            <span class="text-xs text-purple-800 font-bold">${sale.date}</span>
+          <td class="p-3.5 font-black text-purple-950">
+            #${s.id.toUpperCase()}
+            <span class="block text-xs font-bold text-purple-700">${s.date}</span>
           </td>
-          <td class="p-3.5">
-            <span class="font-black text-purple-950 block">${sale.customer}</span>
-            <span class="text-xs text-purple-700 font-bold">${sale.paymentType}</span>
+          <td class="p-3.5 font-bold">
+            ${s.customer}
+            <span class="block text-xs text-purple-600">${s.paymentType}</span>
           </td>
-          <td class="p-3.5 text-purple-900 font-semibold capitalize max-w-xs truncate">${itemsNames}</td>
-          <td class="p-3.5 text-center font-black text-purple-950">${totalPcs} Pcs</td>
-          <td class="p-3.5 font-black text-purple-950">${formatMoney(sale.total)}</td>
-          <td class="p-3.5 font-black text-emerald-700">${formatMoney(sale.profit)}</td>
-          <td class="p-3.5 text-right">
-            <button onclick="reprintReceipt('${sale.id}')" class="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-900 rounded-lg font-extrabold text-xs transition">
-              <i class="fa-solid fa-receipt mr-1"></i> Risiti
+          <td class="p-3.5 text-xs text-purple-900 max-w-xs truncate" title="${itemsSummary}">${itemsSummary}</td>
+          <td class="p-3.5 text-center font-black">${totalItemsPcs} Pcs</td>
+          <td class="p-3.5 font-black text-purple-950">${formatMoney(s.total)}</td>
+          <td class="p-3.5 font-black text-emerald-700">${formatMoney(s.profit)}</td>
+          <td class="p-3.5 text-right space-x-1">
+            <button onclick="reprintReceipt('${s.id}')" class="text-purple-700 hover:text-purple-900 p-1 rounded hover:bg-purple-200" title="Angalia Risiti">
+              <i class="fa-solid fa-receipt text-base"></i>
+            </button>
+            <button onclick="deleteSale('${s.id}')" class="text-red-600 hover:text-red-800 p-1 rounded hover:bg-purple-200" title="Futa Mauzo">
+              <i class="fa-solid fa-trash text-base"></i>
             </button>
           </td>
         `;
@@ -1778,159 +1878,52 @@
             openModal('modalReceipt');
         }
 
-        function setAnalyticsTimeframe(tf) {
-            analyticsTimeframe = tf;
-            document.querySelectorAll('.analytics-filter-btn').forEach(b => {
-                b.className = 'analytics-filter-btn text-xs sm:text-sm px-4 py-2 rounded-xl bg-purple-100 text-purple-900 font-extrabold transition';
-            });
-            const activeBtn = document.getElementById(`filter-${tf}`);
-            if (activeBtn) activeBtn.className = 'analytics-filter-btn text-xs sm:text-sm px-4 py-2 rounded-xl bg-purple-700 text-white font-extrabold transition';
-
-            document.getElementById('analyticsStartDate').value = '';
-            document.getElementById('analyticsEndDate').value = '';
-            customStartDate = '';
-            customEndDate = '';
-
-            renderAnalytics();
-        }
-
-        function applyCustomDateFilter() {
-            customStartDate = document.getElementById('analyticsStartDate').value;
-            customEndDate = document.getElementById('analyticsEndDate').value;
-
-            if (customStartDate || customEndDate) {
-                document.querySelectorAll('.analytics-filter-btn').forEach(b => {
-                    b.className = 'analytics-filter-btn text-xs sm:text-sm px-4 py-2 rounded-xl bg-purple-100 text-purple-900 font-extrabold transition';
-                });
-                analyticsTimeframe = 'custom';
+        function deleteSale(saleId) {
+            if (confirm('Je, una uhakika unataka kufuta rekodi hii ya mauzo? (Kumbuka: Hautarudisha stoki iliyokwisha kuuzwa kiotomatiki).')) {
+                sales = sales.filter(s => s.id !== saleId);
+                saveData();
+                showToast('Mauzo Yamefutwa', 'Rekodi imeondolewa kwenye mfumo.', 'success');
             }
-            renderAnalytics();
-        }
-
-        function getFilteredAnalyticsData() {
-            const today = new Date();
-            let filteredSales = [...sales];
-            let filteredExpenses = [...expenses];
-
-            if (analyticsTimeframe === 'today') {
-                const dateStr = today.toISOString().split('T')[0];
-                filteredSales = sales.filter(s => s.date === dateStr);
-                filteredExpenses = expenses.filter(e => e.date === dateStr);
-            } else if (analyticsTimeframe === 'week') {
-                const sevenDaysAgo = new Date(today);
-                sevenDaysAgo.setDate(today.getDate() - 7);
-                filteredSales = sales.filter(s => new Date(s.date) >= sevenDaysAgo);
-                filteredExpenses = expenses.filter(e => new Date(e.date) >= sevenDaysAgo);
-            } else if (analyticsTimeframe === 'month') {
-                const currentMonth = today.toISOString().substring(0, 7);
-                filteredSales = sales.filter(s => s.date.startsWith(currentMonth));
-                filteredExpenses = expenses.filter(e => e.date.startsWith(currentMonth));
-            } else if (analyticsTimeframe === 'year') {
-                const currentYear = today.getFullYear().toString();
-                filteredSales = sales.filter(s => s.date.startsWith(currentYear));
-                filteredExpenses = expenses.filter(e => e.date.startsWith(currentYear));
-            } else if (analyticsTimeframe === 'custom') {
-                if (customStartDate) {
-                    filteredSales = filteredSales.filter(s => s.date >= customStartDate);
-                    filteredExpenses = filteredExpenses.filter(e => e.date >= customStartDate);
-                }
-                if (customEndDate) {
-                    filteredSales = filteredSales.filter(s => s.date <= customEndDate);
-                    filteredExpenses = filteredExpenses.filter(e => e.date <= customEndDate);
-                }
-            }
-
-            return {filteredSales, filteredExpenses};
-        }
-
-        function renderAnalytics() {
-            const {filteredSales, filteredExpenses} = getFilteredAnalyticsData();
-
-            let totalRevenue = 0;
-            let totalProfitFromSales = 0;
-
-            filteredSales.forEach(s => {
-                totalRevenue += s.total;
-                totalProfitFromSales += s.profit;
-            });
-
-            const totalCOGS = totalRevenue - totalProfitFromSales;
-            const totalExp = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
-            const netProfit = totalProfitFromSales - totalExp;
-
-            let remainingStockValue = 0;
-            inventory.forEach(item => {
-                const unitCost = calculateUnitCost(item);
-                remainingStockValue += item.quantity * unitCost;
-            });
-
-            document.getElementById('cardTotalRevenue').textContent = formatMoney(totalRevenue);
-            document.getElementById('cardTotalCostOfGoods').textContent = formatMoney(totalCOGS);
-            document.getElementById('cardTotalExpenses').textContent = formatMoney(totalExp);
-            document.getElementById('cardNetProfit').textContent = formatMoney(netProfit);
-            document.getElementById('cardRemainingStockValue').textContent = formatMoney(remainingStockValue);
         }
 
         function generateAndSavePDFReport() {
-            const {filteredSales, filteredExpenses} = getFilteredAnalyticsData();
+            const filteredSales = filterByDate(sales);
+            const filteredExpenses = filterByDate(expenses);
 
-            let totalRevenue = 0;
+            let totalRev = 0;
             let totalProfitFromSales = 0;
-
             filteredSales.forEach(s => {
-                totalRevenue += s.total;
+                totalRev += s.total;
                 totalProfitFromSales += s.profit;
             });
 
-            const totalCOGS = totalRevenue - totalProfitFromSales;
-            const totalExp = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+            const totalCOGS = totalRev - totalProfitFromSales;
+            let totalExp = 0;
+            filteredExpenses.forEach(e => {totalExp += e.amount;});
             const netProfit = totalProfitFromSales - totalExp;
 
-            let remainingStockValue = 0;
-            inventory.forEach(item => {
-                const unitCost = calculateUnitCost(item);
-                remainingStockValue += item.quantity * unitCost;
+            let totalRemainingStockVal = 0;
+            inventory.forEach(inv => {
+                const unitCost = calculateUnitCost(inv);
+                totalRemainingStockVal += (inv.quantity * unitCost);
             });
 
-            const generatedDate = new Date().toLocaleDateString('sw-TZ', {
-                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
+            const todayStr = new Date().toLocaleDateString('sw-TZ', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'});
 
-            let timeframeText = 'Muda Wote';
-            if (analyticsTimeframe === 'today') timeframeText = 'Ripoti ya Leo';
-            if (analyticsTimeframe === 'week') timeframeText = 'Ripoti ya Wiki Hii';
-            if (analyticsTimeframe === 'month') timeframeText = 'Ripoti ya Mwezi Huu';
-            if (analyticsTimeframe === 'year') timeframeText = 'Ripoti ya Mwaka Mzima';
-            if (analyticsTimeframe === 'custom') timeframeText = `Kuanzia ${customStartDate || 'Mwanzo'} Mpaka ${customEndDate || 'Leo'}`;
-
-            document.getElementById('pdfReportGeneratedDate').textContent = `Tarehe ya Kutolewa: ${generatedDate}`;
-            document.getElementById('pdfReportTimeframe').textContent = `Muda wa Kipindi: ${timeframeText}`;
-            document.getElementById('pdfPdfRevenue').textContent = formatMoney(totalRevenue);
+            document.getElementById('pdfReportGeneratedDate').textContent = `Tarehe ya Kutengenezwa: ${todayStr}`;
+            document.getElementById('pdfReportTimeframe').textContent = `Kipindi: ${analyticsTimeframe.toUpperCase()}`;
+            document.getElementById('pdfPdfRevenue').textContent = formatMoney(totalRev);
             document.getElementById('pdfPdfCOGS').textContent = formatMoney(totalCOGS);
             document.getElementById('pdfPdfExpenses').textContent = formatMoney(totalExp);
             document.getElementById('pdfPdfNetProfit').textContent = formatMoney(netProfit);
-            document.getElementById('pdfPdfStockValue').textContent = formatMoney(remainingStockValue);
-
-            const reportObj = {
-                id: 'rep_' + Date.now(),
-                date: generatedDate,
-                timeframe: timeframeText,
-                revenue: totalRevenue,
-                cogs: totalCOGS,
-                expenses: totalExp,
-                profit: netProfit,
-                stockValue: remainingStockValue
-            };
-
-            savedReports.unshift(reportObj);
-            saveData();
+            document.getElementById('pdfPdfStockValue').textContent = formatMoney(totalRemainingStockVal);
 
             const element = document.getElementById('pdfReportTemplate');
             element.classList.remove('hidden');
 
             const opt = {
                 margin: 0.5,
-                filename: `Geno_Wholesale_Report_${Date.now()}.pdf`,
+                filename: `Geno_Wholesale_Report_${analyticsTimeframe}_${new Date().toISOString().split('T')[0]}.pdf`,
                 image: {type: 'jpeg', quality: 0.98},
                 html2canvas: {scale: 2},
                 jsPDF: {unit: 'in', format: 'letter', orientation: 'portrait'}
@@ -1938,7 +1931,19 @@
 
             html2pdf().set(opt).from(element).save().then(() => {
                 element.classList.add('hidden');
-                showToast('Ripoti Imekamilika', 'Faili la PDF limepakuliwa na kuhifadhiwa.', 'success');
+
+                const newReportRecord = {
+                    id: 'rep_' + Date.now(),
+                    date: new Date().toISOString().split('T')[0],
+                    timeframe: analyticsTimeframe,
+                    totalRevenue: totalRev,
+                    netProfit: netProfit,
+                    expenses: totalExp
+                };
+
+                savedReports.unshift(newReportRecord);
+                saveData();
+                showToast('Ripoti Ya PDF Imepakuliwa', 'Ripoti imehifadhiwa pia kwenye kumbukumbu ya mfumo.', 'success');
             });
         }
 
@@ -1946,6 +1951,11 @@
             const tbody = document.getElementById('savedReportsTableBody');
             if (!tbody) return;
             tbody.innerHTML = '';
+
+            if (savedReports.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-purple-600 font-bold">Hakuna ripoti zilizohifadhiwa bado. Bonyeza kitufe hapo juu kutengeneza.</td></tr>`;
+                return;
+            }
 
             savedReports.forEach((rep, idx) => {
                 const tr = document.createElement('tr');
@@ -1956,12 +1966,12 @@
             #${rep.id.toUpperCase()}
             <span class="block text-xs font-bold text-purple-700">${rep.date}</span>
           </td>
-          <td class="p-3.5 text-purple-900 font-bold">${rep.timeframe}</td>
-          <td class="p-3.5 font-black text-emerald-700">${formatMoney(rep.revenue)}</td>
-          <td class="p-3.5 font-black text-purple-900">${formatMoney(rep.profit)}</td>
+          <td class="p-3.5 uppercase font-bold text-purple-900">${rep.timeframe}</td>
+          <td class="p-3.5 font-black text-purple-950">${formatMoney(rep.totalRevenue)}</td>
+          <td class="p-3.5 font-black text-emerald-700">${formatMoney(rep.netProfit)}</td>
           <td class="p-3.5 font-black text-amber-700">${formatMoney(rep.expenses)}</td>
           <td class="p-3.5 text-right">
-            <button onclick="deleteSavedReport('${rep.id}')" class="text-red-600 hover:text-red-800 p-1" title="Futa Kumbukumbu">
+            <button onclick="deleteSavedReport('${rep.id}')" class="text-red-600 hover:text-red-800 p-1 rounded hover:bg-purple-200" title="Futa Kumbukumbu">
               <i class="fa-solid fa-trash text-base"></i>
             </button>
           </td>
@@ -1971,10 +1981,10 @@
         }
 
         function deleteSavedReport(id) {
-            if (confirm('Je, una uhakika unataka kufuta kumbukumbu hii ya ripoti?')) {
+            if (confirm('Je, una uhakika unataka kufuta rekodi hii ya ripoti iliyohifadhiwa?')) {
                 savedReports = savedReports.filter(r => r.id !== id);
                 saveData();
-                showToast('Ripoti Imefutwa', 'Kumbukumbu imeondolewa kikamilifu.', 'success');
+                showToast('Ripoti Imefutwa', 'Kumbukumbu ya ripoti imeondolewa.', 'success');
             }
         }
     </script>
