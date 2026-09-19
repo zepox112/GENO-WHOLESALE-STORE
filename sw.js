@@ -5,10 +5,9 @@ const ASSETS_TO_CACHE = [
   './styles.css',
   './script.js',
   './manifest.json',
-  './icon-192.png'
+  './logo.png'
 ];
 
-// Kupakua na kuhifadhi faili wakati wa kusanikisha (Install)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -17,7 +16,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Kuhudumia maombi ya mtandao au kutumia cache wakati hakuna intaneti
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
