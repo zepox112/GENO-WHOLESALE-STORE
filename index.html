@@ -175,44 +175,7 @@
         }
     </script>
 
-    <!-- Modal ya Version 2 Update -->
-    <div id="updateModal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
-        <div
-            style="background:#fff; padding:25px; border-radius:16px; max-width:450px; width:90%; box-shadow:0 20px 40px rgba(0,0,0,0.3); font-family:sans-serif; animation: fadeInScale 0.3s ease;">
-            <h2 style="color:#2c3e50; margin-top:0;">Karibu kwenye Version 2.0! 🎉</h2>
-            <p style="color:#555; font-size:14px; line-height:1.5;">
-                Tume boresha mfumo wako uwe wa kisasa zaidi na salama kwa biashara yako:
-            </p>
-            <ul style="color:#444; font-size:14px; padding-left:20px; line-height:1.6;">
-                <li><b>Hifadhi ya Mtandaoni:</b> Mauzo na matumizi yanajirekodi moja kwa moja kwenye Google Sheets.</li>
-                <li><b>Kompyuta Kutopata Moto:</b> Mzigo umehama kwenye RAM na kupelekwa mtandaoni.</li>
-                <li><b>Ripoti za Haraka:</b> Ufuatiliaji mzuri wa biashara popote ulipo.</li>
-            </ul>
-            <button onclick="closeUpdateModal()"
-                style="background:#7e22ce; color:#ffffff; border:none; padding:12px 20px; border-radius:10px; cursor:pointer; font-weight:bold; width:100%; margin-top:15px; box-shadow: 0 4px 12px rgba(126,34,206,0.3); transition: background 0.2s;">Nimeelewa,
-                Endelea</button>
-        </div>
-    </div>
 
-    <script>
-        // Angalia kama mtumiaji ameshawahi kuona Version 2
-        window.addEventListener('DOMContentLoaded', function () {
-            const hasSeenV2 = localStorage.getItem('seen_version_2_update');
-
-            if (!hasSeenV2) {
-                // Kama hajawahi kuona, ioneshe Modal
-                document.getElementById('updateModal').style.display = 'flex';
-            }
-        });
-
-        // Kazi ya kufunga na kuhifadhi kwenye kifaa ili isijirudie
-        function closeUpdateModal() {
-            document.getElementById('updateModal').style.display = 'none';
-            localStorage.setItem('seen_version_2_update', 'true');
-        }
-    </script>
-    <!-- LOADING SCREEN PAGE -->
     <div id="loadingScreen" class="fixed inset-0 bg-white z-[110] flex flex-col items-center justify-between p-8">
         <div></div>
         <div class="flex flex-col items-center justify-center space-y-4">
