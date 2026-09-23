@@ -1198,7 +1198,7 @@
 
     <script>
         // GOOGLE APPS SCRIPT CLOUD ENDPOINT
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqY_12-mZ1-SLrhka1-Ap9eWxspXP80QsB67HAwOqqJiMumaPZ32fuGIALEDBLfVPv7g/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTCmjNolDCJeTUNdcvFEs5DbL0eAQGHh2SJxlTx93I9B99HGDMU_VsnXY6RgiM1oxlng/exec";
         const DEFAULT_PASS = "Geno@2026";
 
         const defaultInventory = [
@@ -1463,7 +1463,7 @@
 
         function calculateUnitCost(itemObj) {
             if (!itemObj || !itemObj.originalQty || itemObj.originalQty <= 0) return 0;
-            return (itemObj.cost + (itemObj.shipping || 0)) / itemObj.originalQty;
+            return itemObj.cost / itemObj.originalQty; // Inagawanya gharama ya mzigo na idadi pekee
         }
 
         function showToast(title, message, type = 'success') {
